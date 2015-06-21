@@ -44,10 +44,14 @@ def twitnews(n):
     auth.set_access_token(access_key, access_secret)
     api = tweepy.API(auth)
     s = n['title'] + " " + n['link']
-    api.update_status(status=s)
+    try:
+        api.update_status(status=s)
+    except tweepy.TweepError as e:
+        print ("error: ", str(e))
 
 
 def readnews(event1, event2):
+    print('---')
     timestamp = getlasttimestamp()
     setlasttimestamp(timestamp)
     ws = websocket.WebSocket()
@@ -61,9 +65,8 @@ def readnews(event1, event2):
         t = n['tm'] // 1000;
         if timestamp < t:
             timestamp = t
-            spitnews(n)
-            twitnews(n)
-    print('---')
+        spitnews(n)
+        twitnews(n)
     ws.close()
     setlasttimestamp(timestamp)
     event2.set()
