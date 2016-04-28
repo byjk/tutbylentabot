@@ -19,6 +19,8 @@ def spitnews(n):
 def twitnews(n):
     # return
     global posted_urls
+    if n['link'] in posted_urls:
+        return
     config = configparser.ConfigParser()
     config.read(twitterkeys)
     consumer_key = config["api"]["consumer_key"]
@@ -43,9 +45,9 @@ def twitnews(n):
         posted_urls.append(n['link'])
     except tweepy.TweepError as e:
         print ("error: ", str(e))
-        print (access_key)
         print ("status: ", s)
-
+        if (e.api_code == 187):
+            posted_urls.append(n['link'])
 
 def readnews(event1, event2):
     news = feedparser.parse('http://news.tut.by/rss/all.rss')
@@ -76,9 +78,8 @@ def main():
     if e1.wait(60):
         if e2.wait(60):
             None
-    if len(posted_urls) > 1000:
-        with open(posted_urls_file, 'w') as f:
-            f.write('\n'.join(posted_urls[:100]))
+    with open(posted_urls_file, 'w') as f:
+        f.write('\n'.join(posted_urls[-1000:]))
 
 if __name__ == "__main__":
     main()
